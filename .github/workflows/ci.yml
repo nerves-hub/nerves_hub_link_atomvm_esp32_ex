@@ -1,0 +1,110 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Elixir ${{ matrix.elixir }} / OTP ${{ matrix.otp }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # OTP 27 is the agent's floor, since it encodes with the `json`
+        # module. Elixir gained OTP 27 support in 1.17, so that is this
+        # library's floor whatever it would otherwise support.
+        include:
+          - elixir: "1.17"
+            otp: "27"
+          - elixir: "1.18"
+            otp: "27"
+          - elixir: "1.19"
+            otp: "28"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: erlef/setup-beam@v1
+        with:
+          elixir-version: ${{ matrix.elixir }}
+          otp-version: ${{ matrix.otp }}
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-${{ matrix.elixir }}-${{ matrix.otp }}-${{ hashFiles('mix.lock') }}
+          restore-keys: ${{ runner.os }}-${{ matrix.elixir }}-${{ matrix.otp }}-
+
+      - run: mix deps.get
+
+      - run: mix compile --warnings-as-errors
+
+      - run: mix test
+
+  format:
+    name: Format
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: erlef/setup-beam@v1
+        with:
+          elixir-version: "1.19"
+          otp-version: "28"
+
+      - run: mix format --check-formatted
+
+  example:
+    name: Example builds
+    runs-on: ubuntu-latest
+
+    # The example is what proves the library is usable rather than merely
+    # compilable, and it is the only thing here that exercises the mix tasks
+    # against a real project. It cannot be flashed in CI, but it can be built.
+    defaults:
+      run:
+        working-directory: examples/kiosk
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: erlef/setup-beam@v1
+        with:
+          elixir-version: "1.19"
+          otp-version: "28"
+
+      - name: Configuration, which is not committed
+        run: cp lib/config.ex.example lib/config.ex
+
+      - run: mix deps.get
+
+      - run: mix compile
+
+      # Builds the archive a device would run, and signs it, so the packbeam
+      # and signing paths are covered end to end. The key is generated here and
+      # thrown away with the runner.
+      - name: Build and sign a packbeam
+        run: |
+          set -euo pipefail
+          mix atomvm.packbeam
+
+          elixir -e '
+            {public, seed} = :crypto.generate_key(:eddsa, :ed25519)
+            File.write!("ci.priv", Base.encode64(seed <> public) <> "\n")
+          '
+
+          mix nerves_hub.sign --key ci.priv
+          mix nerves_hub.sign --key ci.priv --check

@@ -1,0 +1,18 @@
+# The layout the device is actually running, which is built and flashed from
+# the AtomVM checkout -- not from here. Kept in step with
+# AtomVM/src/platforms/esp32/partitions.csv, and a copy rather than the source
+# of truth: writing an app to an offset from a stale copy of this file lands it
+# inside boot.avm, and the only symptom is `Failed app start: invalid_avm'.
+#
+#   * factory is 1856K because AVM_USE_LIBSODIUM=ON adds ~140K.
+#   * boot.avm is 576K: the Elixir boot image is 530,784 bytes, larger than an
+#     Erlang app's, and does not fit the stock 512K.
+#   * two packbeam slots, so an update never writes over the running one.
+#
+# Name,     Type, SubType, Offset,   Size,     Flags
+nvs,        data, nvs,     0x9000,   0x6000,
+phy_init,   data, phy,     0xf000,   0x1000,
+factory,    app,  factory, 0x10000,  0x1D0000,
+boot.avm,   data, phy,     0x1E0000, 0x90000,
+main.avm,   data, phy,     0x270000, 0xC8000,
+alt.avm,    data, phy,     0x338000, 0xC8000,
