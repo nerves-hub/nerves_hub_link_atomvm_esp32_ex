@@ -13,25 +13,22 @@ the Erlang agent does the work, so anything not covered here can be called on
 defp deps do
   [
     {:nerves_hub_link_atomvm_esp32_ex, "~> 0.1"},
-    # Both rebar3 projects, so mix is told which manager to use.
-    {:nerves_hub_link_atomvm_esp32, "~> 0.1", manager: :rebar3, override: true},
+    # A rebar3 project and not on Hex, so mix is told both where it is and how
+    # to build it.
     {:atomvm_websocket_client,
-     github: "nerves-hub/atomvm_websocket_client", manager: :rebar3, override: true}
+     github: "nerves-hub/atomvm_websocket_client", manager: :rebar3}
   ]
 end
 ```
 
-All three, and none of them optional: this package delegates to the agent, and
-the agent talks to NervesHub over the transport. The transport is also an
-ESP-IDF component, so it has to be compiled into the VM as well as listed here.
+The agent itself is not in that list and does not need to be. This package
+depends on it, so mix resolves and builds it for you.
 
-`manager:` and `override:` belong here, in the application, and not in this
-package's own dependency on the agent: Hex rejects both on a published
-package's dependencies.
-
-The transport stays a git dependency because it is not on Hex. It is an ESP-IDF
-component first and an Erlang library second, and the half that matters is
-compiled into the VM rather than fetched by mix.
+The transport does need to be, because nothing depends on it: it is not on Hex,
+so no published package can. It is an ESP-IDF component first and an Erlang
+library second, and the half that matters is compiled into the VM rather than
+fetched by mix. See
+[building the VM](https://github.com/nerves-hub/nerves_hub_link_atomvm_esp32#building-the-vm).
 
 ## Usage
 

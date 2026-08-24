@@ -5,6 +5,14 @@ and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-08-24
+
+### Fixed
+
+- The **Installing** snippet listed the agent as a dependency. It does not need
+  listing: this package depends on it, so mix resolves and builds it. Verified
+  against Hex with a project depending on nothing else.
+
 ## [0.1.1] - 2026-08-24
 
 ### Fixed
@@ -52,6 +60,7 @@ one carrying `override:` or `manager:`, so `nerves_hub_link_atomvm_esp32` is
 published first and the dependency here becomes a bare version requirement.
 See `mix.exs`.
 
-[Unreleased]: https://github.com/nerves-hub/nerves_hub_link_atomvm_esp32_ex/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/nerves-hub/nerves_hub_link_atomvm_esp32_ex/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/nerves-hub/nerves_hub_link_atomvm_esp32_ex/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/nerves-hub/nerves_hub_link_atomvm_esp32_ex/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/nerves-hub/nerves_hub_link_atomvm_esp32_ex/releases/tag/v0.1.0

@@ -22,6 +22,9 @@ are not themselves on Hex.
 - [ ] `README.md`: the versions in the **Installing** snippet. This is the one
       that gets missed.
 - [ ] `mix test`, `mix test --cover`, `mix format --check-formatted`.
+- [ ] Build a throwaway project that depends only on this package and check
+      the install snippet against it. Nothing else catches a snippet that lists
+      a dependency mix would have resolved anyway.
 - [ ] `mix hex.build`, then look at the file list it prints. `files` in
       `package/0` is an allow list, so a new top-level directory is absent
       until someone adds it.
@@ -38,8 +41,8 @@ prints before confirming.
 ## After
 
 ```
-git tag -a v0.1.1 -m "v0.1.1"
-git push origin v0.1.1
+git tag -a v0.1.2 -m "v0.1.2"
+git push origin v0.1.2
 ```
 
 ## What does not change
