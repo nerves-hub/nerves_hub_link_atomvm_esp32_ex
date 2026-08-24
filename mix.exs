@@ -52,21 +52,7 @@ defmodule NervesHubLink.MixProject do
 
   defp deps do
     [
-      # The agent itself. Everything here delegates to it, and it is a rebar3
-      # project, so mix is told which manager to use.
-      #
-      # PUBLISHING: publish the agent first, then replace this whole entry
-      # with the line below. Hex refuses a git dependency ("only Hex packages
-      # can be dependencies"), and refuses `override:` and `manager:` on a
-      # dependency of a published package too, so what works is the bare
-      # requirement. Verified with `mix hex.build`.
-      #
-      #     {:nerves_hub_link_atomvm_esp32, "~> 0.1"},
-      #
-      # A consuming application still wants `manager: :rebar3, override: true`
-      # in its own deps; those are consumer concerns, not package metadata.
-      {:nerves_hub_link_atomvm_esp32,
-       github: "nerves-hub/nerves_hub_link_atomvm_esp32", manager: :rebar3, override: true},
+      {:nerves_hub_link_atomvm_esp32, "~> 0.1"},
       {:ex_doc, "~> 0.34", only: :dev, runtime: false}
     ]
   end
