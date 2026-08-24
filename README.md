@@ -3,9 +3,10 @@
 An Elixir face for
 [nerves_hub_link_atomvm_esp32](https://github.com/nerves-hub/nerves_hub_link_atomvm_esp32).
 
-A convenience layer, not an abstraction. Every function is one line deep and
-the Erlang agent does the work, so anything not covered here can be called on
-`:nerves_hub_link` directly without leaving the road.
+A convenience layer, not an abstraction. Every function here is one line deep
+and the Erlang agent does the work, so `:nerves_hub_link` can be called
+directly for anything this does not cover. Nothing here holds state, so mixing
+the two is ordinary rather than a workaround.
 
 ## Installing
 

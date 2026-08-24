@@ -5,8 +5,9 @@ defmodule NervesHubLink do
   An Elixir face for `:nerves_hub_link`.
 
   A convenience layer, not an abstraction. Every function here is one line deep
-  and the Erlang agent is the thing doing the work, so anything this does not
-  cover can be called directly on `:nerves_hub_link` without leaving the road.
+  and the Erlang agent does the work, so `:nerves_hub_link` can be called
+  directly for anything this does not cover. Nothing here holds state, so mixing
+  the two is ordinary rather than a workaround.
 
       {:ok, agent} =
         NervesHubLink.start_link(
