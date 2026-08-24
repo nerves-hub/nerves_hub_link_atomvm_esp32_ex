@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0 OR LGPL-2.1-or-later
+
 defmodule NervesHubLink.Logger do
   @moduledoc """
   Logging that does not kill the process that logged.

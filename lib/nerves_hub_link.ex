@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0 OR LGPL-2.1-or-later
+
 defmodule NervesHubLink do
   @moduledoc """
   An Elixir face for `:nerves_hub_link`.

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0 OR LGPL-2.1-or-later
+
 defmodule AtomVMModules do
   @moduledoc """
   What a module can call and still run on AtomVM.

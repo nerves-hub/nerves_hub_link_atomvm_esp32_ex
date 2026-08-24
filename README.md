@@ -7,6 +7,30 @@ A convenience layer, not an abstraction. Every function is one line deep and
 the Erlang agent does the work, so anything not covered here can be called on
 `:nerves_hub_link` directly without leaving the road.
 
+## Installing
+
+```elixir
+defp deps do
+  [
+    {:nerves_hub_link_atomvm_esp32_ex,
+     github: "nerves-hub/nerves_hub_link_atomvm_esp32_ex"},
+    # Both rebar3 projects, so mix is told which manager to use.
+    {:nerves_hub_link_atomvm_esp32,
+     github: "nerves-hub/nerves_hub_link_atomvm_esp32", manager: :rebar3, override: true},
+    {:atomvm_websocket_client,
+     github: "nerves-hub/atomvm_websocket_client", manager: :rebar3, override: true}
+  ]
+end
+```
+
+All three, and none of them optional: this package delegates to the agent, and
+the agent talks to NervesHub over the transport. The transport is also an
+ESP-IDF component, so it has to be compiled into the VM as well as listed here.
+
+Not on Hex yet, which is why these are git dependencies.
+
+## Usage
+
 ```elixir
 {:ok, agent} =
   NervesHubLink.start_link(

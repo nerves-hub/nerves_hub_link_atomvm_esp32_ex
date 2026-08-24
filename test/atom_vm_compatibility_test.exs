@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0 OR LGPL-2.1-or-later
+
 defmodule AtomVMCompatibilityTest do
   use ExUnit.Case, async: true
 
@@ -49,9 +51,22 @@ defmodule AtomVMCompatibilityTest do
   # `imports` is every remote call the module makes, which is exactly the set
   # that has to resolve at load time.
   defp calls(module) do
-    {:ok, {^module, [imports: imports]}} =
-      module |> :code.which() |> :beam_lib.chunks([:imports])
+    {:ok, {^module, [imports: imports]}} = :beam_lib.chunks(beam(module), [:imports])
 
     imports |> Enum.map(fn {called, _function, _arity} -> called end) |> Enum.uniq()
+  end
+
+  # Not `:code.which/1`: under `mix test --cover` that returns `:cover_compiled`
+  # rather than a path, and `:beam_lib` then fails with `:enoent` on a file
+  # called "cover_compiled.beam". This test is the one that stops a
+  # device-breaking call reaching a board, so it has to keep working in the mode
+  # people run before they trust their test suite.
+  defp beam(module) do
+    app = Application.get_application(module)
+
+    app
+    |> Application.app_dir("ebin")
+    |> Path.join("#{module}.beam")
+    |> String.to_charlist()
   end
 end

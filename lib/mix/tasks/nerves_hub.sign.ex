@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0 OR LGPL-2.1-or-later
+
 defmodule Mix.Tasks.NervesHub.Sign do
   @shortdoc "Sign a packbeam archive with the organization's firmware key"
 

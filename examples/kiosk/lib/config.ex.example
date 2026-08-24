@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0 OR LGPL-2.1-or-later
+
 defmodule Config do
   @moduledoc """
   Copy to config.ex and fill in. That file is not committed: it holds a WiFi
