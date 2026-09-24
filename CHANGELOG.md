@@ -5,6 +5,23 @@ and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- Depends on `nerves_hub_link_atomvm_esp32` `~> 0.2`. Read its 0.2.0
+  changelog before upgrading a fleet: firmware that cannot reach NervesHub
+  after an update is now reverted by default, and new events arrive on every
+  join.
+- The README's `GenServer` example ends in a catch-all `handle_info/2` clause.
+  Without one, the `{:update_mode, mode, allowed}` NervesHub sends after every
+  join crashes the device process.
+
+### Added
+
+- `check_for_update/1`, `request_update/1`, `set_update_mode/2` and
+  `update_mode/1`, for devices that manage their own updates.
+- `apply_update/2`, `ignore_update/2` and `reschedule_update/3`, for
+  `updates: :manual`.
+
 ## [0.1.2] - 2026-08-24
 
 ### Fixed

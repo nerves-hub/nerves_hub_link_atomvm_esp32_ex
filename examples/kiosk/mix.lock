@@ -1,6 +1,6 @@
 %{
   "atomvm_websocket_client": {:git, "https://github.com/nerves-hub/atomvm_websocket_client.git", "011b99c30bea5253eb29558e3c6ac420a5472c0f", []},
   "exatomvm": {:git, "https://github.com/atomvm/exatomvm.git", "ff7daf7e83a4e86fbf078730b6c49045a99de9f8", []},
-  "nerves_hub_link_atomvm_esp32": {:git, "https://github.com/nerves-hub/nerves_hub_link_atomvm_esp32.git", "93c45d2fce1bc6f4e4195310a28e0b79db6143cc", []},
+  "nerves_hub_link_atomvm_esp32": {:git, "https://github.com/nerves-hub/nerves_hub_link_atomvm_esp32.git", "e5b85cff7f33f1afea231c26e2ae5dea2aa1ded8", []},
   "uf2tool": {:hex, :uf2tool, "1.1.0", "7091931234ca5a256b66ea691983867d51229798622d083f85c1ad779798a734", [:rebar3], [], "hexpm", "1a7e5ca7ef3d19c7a0b0acf3db804b3188e0980884acffa13fd57d733507b73d"},
 }
