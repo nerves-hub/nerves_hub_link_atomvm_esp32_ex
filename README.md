@@ -13,7 +13,7 @@ the two is ordinary rather than a workaround.
 ```elixir
 defp deps do
   [
-    {:nerves_hub_link_atomvm_esp32_ex, "~> 0.1"},
+    {:nerves_hub_link_atomvm_esp32_ex, "~> 0.2"},
     # A rebar3 project and not on Hex, so mix is told both where it is and how
     # to build it.
     {:atomvm_websocket_client,

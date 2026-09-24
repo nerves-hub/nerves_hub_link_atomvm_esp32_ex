@@ -3,7 +3,7 @@
 defmodule NervesHubLink.MixProject do
   use Mix.Project
 
-  @version "0.1.2"
+  @version "0.2.0"
   @source_url "https://github.com/nerves-hub/nerves_hub_link_atomvm_esp32_ex"
 
   def project do
