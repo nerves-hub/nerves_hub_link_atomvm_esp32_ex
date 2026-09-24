@@ -116,8 +116,9 @@ defmodule NervesHubLink do
   @doc """
   Tell NervesHub the running firmware works.
 
-  Until this arrives the update is on probation, and a device that reboots
-  without sending it is treated as having failed.
+  Rarely needed: the agent sends this itself once a new firmware joins
+  NervesHub, and reverts one that cannot join. See `firmware_trial` in the
+  agent's README.
   """
   def firmware_validated(agent), do: :nerves_hub_link.firmware_validated(agent)
 
@@ -140,4 +141,55 @@ defmodule NervesHubLink do
 
   @doc "Push a message on the device channel."
   def push(agent, event, payload), do: :nerves_hub_link.push(agent, event, payload)
+
+  @doc """
+  Install an update that `updates: :manual` reported and did not act on.
+
+  `payload` is the one from `{:nerves_hub, {:message, "update", payload}}`.
+  """
+  def apply_update(agent, payload), do: :nerves_hub_link.apply_update(agent, payload)
+
+  @doc """
+  Decline an update, telling NervesHub why.
+
+  NervesHub holds further updates back for the deployment's penalty timeout.
+  """
+  def ignore_update(agent, reason), do: :nerves_hub_link.ignore_update(agent, reason)
+
+  @doc "Not now: ask NervesHub to offer the update again in `delay_ms`."
+  def reschedule_update(agent, delay_ms, reason),
+    do: :nerves_hub_link.reschedule_update(agent, delay_ms, reason)
+
+  @doc """
+  Ask NervesHub whether there is an update for this device, without fetching it.
+
+      {:ok, %{available: true, firmware_meta: meta}} = NervesHubLink.check_for_update(agent)
+  """
+  def check_for_update(agent), do: :nerves_hub_link.check_for_update(agent)
+
+  @doc """
+  Ask NervesHub for the update, and install it when it comes.
+
+  How a device in `:device_managed` mode updates. `:ok` means the download has
+  begun; the result arrives as `{:update_ready, slot}` or
+  `{:update_failed, reason}`. NervesHub refuses with `{:error, :no_update}`,
+  `{:error, :no_deployment_group}` and the like.
+  """
+  def request_update(agent), do: :nerves_hub_link.request_update(agent)
+
+  @doc """
+  Choose who decides when this device updates: `:automatic` or `:device_managed`.
+
+  `{:error, :not_permitted}` for a product that does not allow devices to
+  manage their own updates.
+  """
+  def set_update_mode(agent, mode), do: :nerves_hub_link.set_update_mode(agent, mode)
+
+  @doc """
+  The update mode NervesHub last reported, without asking it again.
+
+  `{:error, :unknown}` until NervesHub has reported one, which it does after
+  every join.
+  """
+  def update_mode(agent), do: :nerves_hub_link.update_mode(agent)
 end

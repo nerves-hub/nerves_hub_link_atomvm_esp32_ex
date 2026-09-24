@@ -103,16 +103,19 @@ defmodule Kiosk.Device do
     :esp.restart()
     {:noreply, state}
   end
+
+  # Everything else. Not optional: see below.
+  def handle_info({:nerves_hub, _event}, state), do: {:noreply, state}
 end
 ```
 
 Please see [examples/kiosk](examples/kiosk) for an example implementation.
 
-Be careful with a catch-all clause that logs. A log line sent before the
-logging extension attaches comes back as `{:not_joined, "logging:send"}`, and
-logging *that* sends another line, which comes back again. It settles once the
-extension is up, but until then the process chases its own tail. Drop that
-event rather than report it.
+Keep the last clause. The agent reports more than any one device cares about,
+and some of it arrives on every connection: NervesHub sends the update mode
+after each join, so `{:update_mode, mode, allowed}` turns up whether or not the
+device ever uses it. A `GenServer` with no clause for a message crashes on it,
+and the supervisor restarts it into the same message on the next join.
 
 ## Supervision
 
@@ -173,6 +176,45 @@ seconds. A device whose WiFi is not up yet can spend those three restarts
 before the radio has an address, and then the supervisor exits and takes the
 application with it. Bringing the network up before starting the tree, as
 `start/0` above does, is the simple fix; raising `:max_restarts` is the other.
+
+## Updates
+
+By default the agent installs what NervesHub offers and reports
+`{:update_ready, slot}`, leaving the reboot to you as above. Two other ways to
+run it:
+
+**`updates: :manual`** reports the offer as `{:message, "update", payload}` and
+waits for a decision:
+
+```elixir
+def handle_info({:nerves_hub, {:message, "update", payload}}, state) do
+  if on_battery?() do
+    NervesHubLink.reschedule_update(state.agent, :timer.hours(1), "on battery")
+  else
+    NervesHubLink.apply_update(state.agent, payload)
+  end
+
+  {:noreply, state}
+end
+```
+
+**Device-managed**, for a product that allows it, stops NervesHub pushing and
+leaves the device to ask:
+
+```elixir
+{:ok, _mode} = NervesHubLink.set_update_mode(agent, :device_managed)
+
+with {:ok, %{available: true}} <- NervesHubLink.check_for_update(agent) do
+  NervesHubLink.request_update(agent)
+end
+```
+
+These block for up to 30 seconds waiting for NervesHub, so call them from a
+process that can afford to wait rather than from the device's `handle_info/2`.
+
+A new firmware is on trial until it joins NervesHub. One that cannot manage it
+in three boots is reverted, and the device restarts into what it ran before.
+The count is kept when the agent starts, so start it early.
 
 ## Logging
 

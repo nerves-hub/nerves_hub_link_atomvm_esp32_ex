@@ -93,11 +93,9 @@ defmodule Kiosk.Device do
     {:noreply, state}
   end
 
-  # Dropped rather than logged, and the reason is a loop: a log line sent
-  # before the logging extension attaches comes back as this event, and
-  # logging *that* sends another line, which comes back again. It settles once
-  # the extension is up, but a catch-all that logs everything will chase its
-  # own tail until then.
+  # Dropped rather than logged: something pushed while the connection is down
+  # comes back as this, and it says nothing a `{:disconnected, _}` did not.
+  # Log lines are not among them; the agent holds those until logging attaches.
   def handle_info({:nerves_hub, {:not_joined, _topic}}, state), do: {:noreply, state}
 
   def handle_info({:nerves_hub, event}, state) do

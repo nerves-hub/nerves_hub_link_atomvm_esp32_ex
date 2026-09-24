@@ -52,7 +52,7 @@ defmodule NervesHubLink.MixProject do
 
   defp deps do
     [
-      {:nerves_hub_link_atomvm_esp32, "~> 0.1"},
+      {:nerves_hub_link_atomvm_esp32, "~> 0.2"},
       {:ex_doc, "~> 0.34", only: :dev, runtime: false}
     ]
   end

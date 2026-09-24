@@ -69,3 +69,69 @@ defmodule NervesHubLinkTest do
     end
   end
 end
+
+defmodule NervesHubLinkWrappersTest do
+  use ExUnit.Case, async: true
+
+  # Every function the agent offers has a counterpart here, so nobody has to
+  # notice which ones are missing and reach for `:nerves_hub_link` instead.
+  test "wraps everything the agent exports" do
+    agent = :nerves_hub_link.module_info(:exports) -- [module_info: 0, module_info: 1]
+    wrapped = NervesHubLink.__info__(:functions)
+
+    missing = for {name, arity} <- agent, not wrapped?(wrapped, name, arity), do: {name, arity}
+    assert missing == []
+  end
+
+  # A default argument can stand in for the shorter arity.
+  defp wrapped?(wrapped, name, arity),
+    do: {name, arity} in wrapped or {name, arity + 1} in wrapped
+
+  describe "update decisions" do
+    test "go to the agent as messages" do
+      :ok = NervesHubLink.ignore_update(self(), "on battery")
+      assert_receive {:update_decision, {:ignore, "on battery"}}
+
+      :ok = NervesHubLink.reschedule_update(self(), 60_000, "busy")
+      assert_receive {:update_decision, {:reschedule, 60_000, "busy"}}
+
+      :ok = NervesHubLink.apply_update(self(), %{"firmware_url" => "u"})
+      assert_receive {:update_decision, {:apply, %{"firmware_url" => "u"}}}
+    end
+  end
+
+  describe "device-managed updates" do
+    # Answers one call the way the agent does, and nothing more.
+    defp fake_agent(reply) do
+      spawn(fn ->
+        receive do
+          {:call, from, tag, request} -> send(from, {tag, reply.(request)})
+        end
+      end)
+    end
+
+    test "check_for_update/1 asks and returns the answer" do
+      agent = fake_agent(fn :check_update -> {:ok, %{available: false, firmware_meta: :null}} end)
+      assert {:ok, %{available: false}} = NervesHubLink.check_for_update(agent)
+    end
+
+    test "request_update/1 passes a refusal through" do
+      agent = fake_agent(fn :request_update -> {:error, :no_update} end)
+      assert {:error, :no_update} = NervesHubLink.request_update(agent)
+    end
+
+    test "set_update_mode/2 sends the mode as NervesHub spells it" do
+      agent = fake_agent(fn {:set_update_mode, mode} -> {:ok, mode} end)
+      assert {:ok, "device_managed"} = NervesHubLink.set_update_mode(agent, :device_managed)
+    end
+
+    test "set_update_mode/2 refuses a mode a device may not set" do
+      assert {:error, {:invalid_update_mode, :off}} = NervesHubLink.set_update_mode(self(), :off)
+    end
+
+    test "update_mode/1 returns what the agent last heard" do
+      agent = fake_agent(fn :update_mode -> {:error, :unknown} end)
+      assert {:error, :unknown} = NervesHubLink.update_mode(agent)
+    end
+  end
+end
