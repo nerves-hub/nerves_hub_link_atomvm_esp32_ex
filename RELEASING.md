@@ -41,8 +41,8 @@ prints before confirming.
 ## After
 
 ```
-git tag -a v0.1.2 -m "v0.1.2"
-git push origin v0.1.2
+git tag -a v0.2.0 -m "v0.2.0"
+git push origin v0.2.0
 ```
 
 ## What does not change
