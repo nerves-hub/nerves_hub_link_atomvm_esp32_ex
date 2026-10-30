@@ -5,6 +5,12 @@ and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- `mix nerves_hub.atomvm.vm --no-smp`, for one scheduler instead of one per
+  core. On an ESP32 without PSRAM the ~16KB it saves is what lets an update's
+  TLS download fit.
+
 ## [0.2.0] - 2026-09-24
 
 ### Changed
