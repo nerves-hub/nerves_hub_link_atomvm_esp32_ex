@@ -26,6 +26,9 @@ defmodule Mix.Tasks.NervesHub.Atomvm.Vm do
     * `--target` - the chip, `esp32` by default
     * `--no-libsodium` - skip Ed25519, and with it firmware signature
       verification. The two update slots are still set up
+    * `--no-smp` - one scheduler instead of one per core. Each scheduler
+      thread gets the full main task stack, and on an ESP32 without PSRAM the
+      ~16KB saved is what lets an update's TLS download fit
     * `--dry-run` - print what would happen and change nothing
   """
 
@@ -37,7 +40,7 @@ defmodule Mix.Tasks.NervesHub.Atomvm.Vm do
   def run(argv) do
     {options, paths} =
       OptionParser.parse!(argv,
-        strict: [target: :string, libsodium: :boolean, dry_run: :boolean]
+        strict: [target: :string, libsodium: :boolean, smp: :boolean, dry_run: :boolean]
       )
 
     {atomvm, transport} = paths(paths)
@@ -100,12 +103,15 @@ defmodule Mix.Tasks.NervesHub.Atomvm.Vm do
   defp idf(esp32, transport, priv, options, dry_run?) do
     target = Keyword.get(options, :target, "esp32")
     libsodium = if Keyword.get(options, :libsodium, true), do: "ON", else: "OFF"
+    # Passed either way: CMake caches it, so leaving it out keeps the last value.
+    disable_smp = if Keyword.get(options, :smp, true), do: "OFF", else: "ON"
 
     # `set-target` rather than `reconfigure`: CMake caches its component list,
     # and a plain build after adding one reports success without ever
     # compiling it.
     configure = [
       "-DAVM_USE_LIBSODIUM=#{libsodium}",
+      "-DAVM_DISABLE_SMP=#{disable_smp}",
       "-DEXTRA_COMPONENT_DIRS=#{transport}",
       "-DSDKCONFIG_DEFAULTS=sdkconfig.defaults;#{Path.join(priv, "sdkconfig.defaults")}",
       "set-target",
