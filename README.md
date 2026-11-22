@@ -60,6 +60,14 @@ and runs `idf.py` with the right flags. `--dry-run` prints what it would do.
 The agent's README explains
 [what each change buys](https://github.com/nerves-hub/nerves_hub_link_atomvm_esp32#building-the-vm).
 
+For a plain ESP32 the task builds the VM with a single scheduler rather than
+one per core. Each extra scheduler takes a 16KB stack of its own, and on a
+board without PSRAM, which is most of them, that is the memory an update's TLS
+download needs: with both cores scheduling, updates fail for lack of memory.
+Pass `--smp` if your board has PSRAM and you want both cores. Other targets
+keep one scheduler per core; pass `--no-smp` for a dual-core chip such as an
+ESP32-S3 without PSRAM.
+
 ## Write the device as a GenServer
 
 The agent sends `{:nerves_hub, event}` to whatever process is named as its
