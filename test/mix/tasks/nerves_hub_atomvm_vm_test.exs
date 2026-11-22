@@ -33,14 +33,26 @@ defmodule Mix.Tasks.NervesHub.Atomvm.VmTest do
     %{paths: [atomvm, transport]}
   end
 
-  test "keeps SMP on by default", context do
+  test "builds an esp32 with one scheduler by default", context do
     @task.run(["--dry-run" | context.paths])
+
+    assert configure() =~ "-DAVM_DISABLE_SMP=ON"
+  end
+
+  test "builds an esp32 with one scheduler per core with --smp", context do
+    @task.run(["--dry-run", "--smp" | context.paths])
 
     assert configure() =~ "-DAVM_DISABLE_SMP=OFF"
   end
 
-  test "builds with one scheduler with --no-smp", context do
-    @task.run(["--dry-run", "--no-smp" | context.paths])
+  test "keeps SMP on by default for other targets", context do
+    @task.run(["--dry-run", "--target", "esp32s3" | context.paths])
+
+    assert configure() =~ "-DAVM_DISABLE_SMP=OFF"
+  end
+
+  test "builds another target with one scheduler with --no-smp", context do
+    @task.run(["--dry-run", "--target", "esp32s3", "--no-smp" | context.paths])
 
     assert configure() =~ "-DAVM_DISABLE_SMP=ON"
   end

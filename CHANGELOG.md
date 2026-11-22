@@ -5,11 +5,17 @@ and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- `mix nerves_hub.atomvm.vm` builds a plain ESP32's VM with one scheduler
+  instead of one per core. Each extra scheduler has a 16KB stack of its own,
+  and on an ESP32 without PSRAM that is the memory an update's TLS download
+  needs. Pass `--smp` to keep both cores. Other targets are unchanged.
+
 ### Added
 
-- `mix nerves_hub.atomvm.vm --no-smp`, for one scheduler instead of one per
-  core. On an ESP32 without PSRAM the ~16KB it saves is what lets an update's
-  TLS download fit.
+- `--smp` and `--no-smp` on `mix nerves_hub.atomvm.vm`, to choose either way
+  on any dual-core target.
 
 ## [0.2.0] - 2026-09-24
 

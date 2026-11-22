@@ -26,9 +26,14 @@ defmodule Mix.Tasks.NervesHub.Atomvm.Vm do
     * `--target` - the chip, `esp32` by default
     * `--no-libsodium` - skip Ed25519, and with it firmware signature
       verification. The two update slots are still set up
-    * `--no-smp` - one scheduler instead of one per core. Each scheduler
-      thread gets the full main task stack, and on an ESP32 without PSRAM the
-      ~16KB saved is what lets an update's TLS download fit
+    * `--smp` / `--no-smp` - one scheduler per core, or a single one. Off for
+      `esp32`, on for every other target. Each scheduler after the first runs
+      in a thread with its own main task stack (16KB with the agent's
+      defaults), and on an ESP32 without PSRAM that is the memory an update's
+      TLS download needs. Pass `--smp` for an ESP32 with PSRAM to use both
+      cores, or `--no-smp` for another dual-core chip without it. Single-core
+      chips (esp32c3, esp32s2, esp32c6 and the like) build without SMP
+      whatever is passed
     * `--dry-run` - print what would happen and change nothing
   """
 
@@ -103,8 +108,11 @@ defmodule Mix.Tasks.NervesHub.Atomvm.Vm do
   defp idf(esp32, transport, priv, options, dry_run?) do
     target = Keyword.get(options, :target, "esp32")
     libsodium = if Keyword.get(options, :libsodium, true), do: "ON", else: "OFF"
+    # Off by default for a plain ESP32: most of its boards have no PSRAM, and
+    # there the second scheduler's stack leaves an update too little memory.
+    smp? = Keyword.get(options, :smp, target != "esp32")
     # Passed either way: CMake caches it, so leaving it out keeps the last value.
-    disable_smp = if Keyword.get(options, :smp, true), do: "OFF", else: "ON"
+    disable_smp = if smp?, do: "OFF", else: "ON"
 
     # `set-target` rather than `reconfigure`: CMake caches its component list,
     # and a plain build after adding one reports success without ever
